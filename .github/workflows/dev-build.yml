@@ -33,13 +33,13 @@ jobs:
         id: set-matrix
         run: |
           if [ "${{ github.event.inputs.platforms }}" = "all" ]; then
-            echo 'matrix={"include":[{"platform":"macos-latest","target":"aarch64-apple-darwin","name":"macOS-ARM64"},{"platform":"macos-latest","target":"x86_64-apple-darwin","name":"macOS-x64"},{"platform":"windows-latest","target":"x86_64-pc-windows-msvc","name":"Windows-x64"},{"platform":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu","name":"Linux-x64"}]}' >> $GITHUB_OUTPUT
+            echo 'matrix={"include":[{"platform":"macos-latest","target":"aarch64-apple-darwin","name":"macOS-ARM64"},{"platform":"macos-latest","target":"x86_64-apple-darwin","name":"macOS-x64"},{"platform":"windows-latest","target":"x86_64-pc-windows-msvc","name":"Windows-x64"},{"platform":"ubuntu-latest","target":"x86_64-unknown-linux-gnu","name":"Linux-x64"}]}' >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.platforms }}" = "macos-only" ]; then
             echo 'matrix={"include":[{"platform":"macos-latest","target":"aarch64-apple-darwin","name":"macOS-ARM64"},{"platform":"macos-latest","target":"x86_64-apple-darwin","name":"macOS-x64"}]}' >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.platforms }}" = "windows-only" ]; then
             echo 'matrix={"include":[{"platform":"windows-latest","target":"x86_64-pc-windows-msvc","name":"Windows-x64"}]}' >> $GITHUB_OUTPUT
           elif [ "${{ github.event.inputs.platforms }}" = "linux-only" ]; then
-            echo 'matrix={"include":[{"platform":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu","name":"Linux-x64"}]}' >> $GITHUB_OUTPUT
+            echo 'matrix={"include":[{"platform":"ubuntu-latest","target":"x86_64-unknown-linux-gnu","name":"Linux-x64"}]}' >> $GITHUB_OUTPUT
           fi
 
   build:
@@ -59,7 +59,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: latest
           cache: 'npm'
 
       - name: Setup Rust
@@ -74,7 +74,7 @@ jobs:
           prefix-key: dev-${{ github.event.inputs.branch }}
 
       - name: Install dependencies (Linux)
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
@@ -105,7 +105,7 @@ jobs:
           echo "msi=$($MSI.FullName)" >> $env:GITHUB_OUTPUT
 
       - name: Get artifact paths (Linux)
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-latest'
         id: artifacts_linux
         run: |
           DEB=$(find src-tauri/target/${{ matrix.target }}/release/bundle/deb -name "*.deb" | head -1)
@@ -130,7 +130,7 @@ jobs:
           retention-days: 14
 
       - name: Upload Linux artifacts
-        if: matrix.platform == 'ubuntu-22.04'
+        if: matrix.platform == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: kuse-cowork-${{ github.event.inputs.branch }}-${{ matrix.name }}
